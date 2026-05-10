@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Open Day — Project Evaluation</title>
+  <style>
+    /* ── Design tokens ─────────────────────────────────────── */
+    :root {
+      --pri:   #0f6cbf;
+      --pri-d: #0a4f8e;
+      --pri-l: #e8f2fb;
+      --bg:    #eef4fc;
+      --card:  #ffffff;
+      --bdr:   #ccdff5;
+      --txt:   #1a2535;
+      --muted: #6a7f99;
+      --g5: #27ae60;  --g4: #58d68d;
+      --g3: #f39c12;  --g2: #e67e22;  --g1: #e74c3c;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--txt);
+      padding: 20px; min-height: 100vh;
+    }
+    .container { max-width: 880px; margin: auto; }
+
+    /* ── Header ────────────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, var(--pri), var(--pri-d));
+      color: #fff; padding: 30px 32px; border-radius: 18px;
+      margin-bottom: 24px; text-align: center;
+      box-shadow: 0 8px 28px rgba(15,108,191,.3);
+    }
+    .hero h1 { font-size: 1.8em; letter-spacing:.01em; margin-bottom: 6px; }
+    .hero p  { opacity:.85; font-size:.95em; }
+    .hero-pills {
+      display: flex; justify-content: center; gap: 10px;
+      flex-wrap: wrap; margin-top: 14px;
+    }
+    .pill {
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 20px; padding: 4px 14px;
+      font-size: .8em; font-weight: 600;
+    }
+
+    /* ── Card ──────────────────────────────────────────────── */
+    .card {
+      background: var(--card); border: 1px solid var(--bdr);
+      border-radius: 16px; padding: 28px 30px; margin-bottom: 24px;
+      box-shadow: 0 4px 18px rgba(15,108,191,.07);
+    }
+    .card-title {
+      font-size: 1.08em; font-weight: 700; color: var(--pri);
+      border-bottom: 2px solid var(--bdr);
+      padding-bottom: 10px; margin-bottom: 22px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ── Form grid ─────────────────────────────────────────── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .fgroup label {
+      display: block; font-size: .8em; font-weight: 700;
+      color: var(--muted); text-transform: uppercase;
+      letter-spacing: .05em; margin-bottom: 6px;
+    }
+    .fgroup input, .fgroup textarea {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid var(--bdr); border-radius: 9px;
+      font-size: .96em; color: var(--txt);
+      background: #f5f9fe; transition: border-color .2s, box-shadow .2s;
+    }
+    .fgroup input:focus, .fgroup textarea:focus {
+      outline: none; border-color: var(--pri);
+      background: #fff; box-shadow: 0 0 0 3px rgba(15,108,191,.1);
+    }
+    .req { color: #e74c3c; }
+
+    /* ── Legend ────────────────────────────────────────────── */
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin-bottom: 14px; align-items: center;
+    }
+    .legend-lbl { font-size: .8em; font-weight: 700; color: var(--txt); }
+    .legend-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: .78em; color: var(--muted);
+    }
+    .ldot { width:11px; height:11px; border-radius:50%; flex-shrink:0; }
+
+    /* ── Criteria table ─────────────────────────────────────── */
+    .ctable { border-radius: 11px; overflow: hidden; border: 1.5px solid var(--bdr); }
+    .ctable-head {
+      display: grid; grid-template-columns: 36px 1fr 195px;
+      gap: 10px; align-items: center;
+      padding: 10px 14px;
+      background: var(--pri); color: #fff;
+      font-size: .76em; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .05em;
+    }
+    .crow {
+      display: grid; grid-template-columns: 36px 1fr 195px;
+      gap: 10px; align-items: center;
+      padding: 15px 14px; border-top: 1px solid var(--bdr);
+      background: #fff; transition: background .15s;
+    }
+    .crow:nth-child(even) { background: #f5f9fe; }
+    .crow:hover { background: var(--pri-l); }
+
+    .cnum {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--pri); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .78em; font-weight: 800; flex-shrink: 0;
+    }
+    .ctxt  { font-size: .9em; font-weight: 600; line-height: 1.4; }
+    .csub  { font-size: .77em; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+
+    /* ── Score buttons ──────────────────────────────────────── */
+    .sbtns { display: flex; gap: 5px; justify-content: flex-end; }
+    .sbtn {
+      width: 33px; height: 33px; border-radius: 8px;
+      border: 1.5px solid var(--bdr);
+      background: #eef4fc; color: #888;
+      font-size: .84em; font-weight: 800; cursor: pointer;
+      transition: all .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sbtn:hover { border-color: var(--pri); color: var(--pri); background: #dceefb; }
+    .sbtn.active.v5 { background: var(--g5); border-color: var(--g5); color:#fff; transform: scale(1.1); }
+    .sbtn.active.v4 { background: var(--g4); border-color: var(--g4); color:#fff; transform: scale(1.1); }
+    .sbtn.active.v3 { background: var(--g3); border-color: var(--g3); color:#fff; transform: scale(1.1); }
+    .sbtn.active.v2 { background: var(--g2); border-color: var(--g2); color:#fff; transform: scale(1.1); }
+    .sbtn.active.v1 { background: var(--g1); border-color: var(--g1); color:#fff; transform: scale(1.1); }
+
+    /* ── Score summary bar ──────────────────────────────────── */
+    .summary {
+      display: flex; align-items: center; gap: 18px;
+      background: linear-gradient(135deg,#f0f7fe,#dceefb);
+      border: 1.5px solid var(--bdr);
+      border-radius: 13px; padding: 16px 22px; margin: 20px 0 4px;
+    }
+    .sum-score { font-size: 2.4em; font-weight: 900; color: var(--pri); line-height:1; white-space:nowrap; }
+    .sum-score span { font-size:.38em; font-weight:400; color:var(--muted); }
+    .bar-wrap { flex:1; height: 13px; background: #ccdff5; border-radius: 7px; overflow:hidden; }
+    .bar-fill {
+      height:100%; border-radius:7px;
+      background: linear-gradient(90deg, var(--pri), #5ca8f5);
+      transition: width .4s ease, background .4s ease;
+    }
+    .sum-pct { font-size:1.6em; font-weight:900; color:var(--pri); min-width:58px; text-align:right; }
+
+    /* ── Submit ─────────────────────────────────────────────── */
+    .submit-btn {
+      width:100%; padding:15px; margin-top:18px;
+      background: linear-gradient(135deg, var(--pri), var(--pri-d));
+      color:#fff; border:none; border-radius:11px;
+      font-size:1em; font-weight:700; cursor:pointer;
+      letter-spacing:.02em; transition: all .2s;
+    }
+    .submit-btn:hover    { transform:translateY(-2px); box-shadow:0 8px 24px rgba(15,108,191,.35); }
+    .submit-btn:disabled { background:#b0c8e8; transform:none; box-shadow:none; cursor:not-allowed; }
+
+    /* ── Toast ──────────────────────────────────────────────── */
+    .toast {
+      display:none; padding:13px 18px; border-radius:9px;
+      font-weight:600; margin-bottom:18px; font-size:.93em;
+    }
+    .toast.ok   { display:block; background:#eafaf1; color:#1e8449; border:1.5px solid #a9dfbf; }
+    .toast.err  { display:block; background:#fdedec; color:#922b21; border:1.5px solid #f1948a; }
+    .toast.warn { display:block; background:#fef9e7; color:#b7770d; border:1.5px solid #f9e79f; }
+
+    /* ── Leaderboard ────────────────────────────────────────── */
+    .lb-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
+    .lb-count { font-size:.87em; color:var(--muted); font-style:italic; }
+    .refresh-btn {
+      border: 1.5px solid var(--pri); color:var(--pri);
+      background:none; padding:7px 18px; font-size:.84em;
+      border-radius:8px; cursor:pointer; font-weight:700;
+      transition: all .2s;
+    }
+    .refresh-btn:hover { background:var(--pri); color:#fff; }
+
+    table { width:100%; border-collapse:collapse; }
+    thead th {
+      background:var(--pri); color:#fff;
+      padding:11px 13px; text-align:left;
+      font-size:.76em; text-transform:uppercase; letter-spacing:.04em;
+    }
+    thead th:first-child { border-radius:9px 0 0 0; }
+    thead th:last-child  { border-radius:0 9px 0 0; }
+    tbody td { padding:13px 13px; border-bottom:1px solid var(--bdr); font-size:.88em; vertical-align:top; }
+    tbody tr:last-child td { border-bottom:none; }
+    tbody tr:hover td { background:var(--pri-l); }
+
+    .rbadge {
+      display:inline-flex; align-items:center; justify-content:center;
+      min-width:38px; padding:4px 8px; border-radius:7px;
+      font-weight:800; font-size:.84em;
+    }
+    .r1{background:#f1c40f;color:#fff;}
+    .r2{background:#95a5a6;color:#fff;}
+    .r3{background:#e67e22;color:#fff;}
+    .rn{background:#ecf0f1;color:#555;}
+
+    .spill { display:inline-block; padding:3px 11px; border-radius:20px; font-weight:700; font-size:.86em; }
+    .sh { background:#eafaf1; color:#1e8449; }
+    .sm { background:#fef9e7; color:#d35400; }
+    .sl { background:#fdedec; color:#922b21; }
+
+    .pmini { height:6px; background:#ccdff5; border-radius:3px; margin-top:5px; overflow:hidden; min-width:80px; }
+    .pmini-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--pri),#5ca8f5); }
+
+    .proj-title { font-weight:700; color:var(--txt); }
+    .proj-team  { font-size:.8em; color:var(--muted); margin-top:2px; }
+    .breakdown  { font-size:.74em; color:#aaa; margin-top:4px; letter-spacing:.03em; }
+
+    .loading { text-align:center; color:var(--muted); font-style:italic; padding:30px; }
+
+    @media(max-width:620px){
+      .form-grid { grid-template-columns:1fr; }
+      .ctable-head { grid-template-columns:28px 1fr; }
+      .ctable-head .hd-score { display:none; }
+      .crow { display:block; }
+      .cnum { display:inline-flex; margin-bottom:6px; }
+      .sbtns { justify-content:flex-start; margin-top:8px; }
+      .hero h1 { font-size:1.4em; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ── Hero ─────────────────────────────────────────────── -->
+  <div class="hero">
+    <h1>🔬 Open Day — Project Evaluation</h1>
+    <p>Score student projects across 5 key criteria. Max 25 points per project.</p>
+    <div class="hero-pills">
+      <span class="pill">📊 5 Criteria</span>
+      <span class="pill">⭐ Max Score: 25</span>
+      <span class="pill">📡 Live Google Sheets Sync</span>
+    </div>
+  </div>
+
+  <!-- ── Evaluation Form ──────────────────────────────────── -->
+  <div class="card">
+    <div class="card-title">📝 Evaluation Form</div>
+    <div id="toast" class="toast"></div>
+
+    <div class="form-grid">
+      <div class="fgroup">
+        <label>Evaluator Name <span class="req">*</span></label>
+        <input id="evaluatorName" type="text" placeholder="Your full name" />
+      </div>
+      <div class="fgroup">
+        <label>Project Title <span class="req">*</span></label>
+        <input id="projectTitle" type="text" placeholder="e.g. Smart Irrigation System" />
+      </div>
+      <div class="fgroup">
+        <label>Team / Student Name <span class="req">*</span></label>
+        <input id="teamName" type="text" placeholder="e.g. Team Alpha or Priya &amp; Ravi" />
+      </div>
+      <div class="fgroup">
+        <label>Department / Class <span style="font-weight:400;text-transform:none;">(optional)</span></label>
+        <input id="department" type="text" placeholder="e.g. CSE – 3rd Year" />
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <span class="legend-lbl">Score guide →</span>
+      <span class="legend-item"><span class="ldot" style="background:var(--g1)"></span>1 Very Poor</span>
+      <span class="legend-item"><span class="ldot" style="background:var(--g2)"></span>2 Poor</span>
+      <span class="legend-item"><span class="ldot" style="background:var(--g3)"></span>3 Average</span>
+      <span class="legend-item"><span class="ldot" style="background:var(--g4)"></span>4 Good</span>
+      <span class="legend-item"><span class="ldot" style="background:var(--g5)"></span>5 Excellent</span>
+    </div>
+
+    <!-- Criteria table -->
+    <div class="ctable">
+      <div class="ctable-head">
+        <div>#</div>
+        <div>Evaluation Criteria</div>
+        <div class="hd-score" style="text-align:right;">Score (1–5)</div>
+      </div>
+      <div id="criteriaRows"></div>
+    </div>
+
+    <!-- Score summary -->
+    <div class="summary">
+      <div>
+        <div style="font-size:.75em;font-weight:700;color:var(--muted);margin-bottom:4px;">TOTAL SCORE</div>
+        <div class="sum-score" id="sumScore">25 <span>/ 25</span></div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill" id="barFill" style="width:100%"></div></div>
+      <div>
+        <div style="font-size:.75em;font-weight:700;color:var(--muted);margin-bottom:4px;text-align:right;">PERCENTAGE</div>
+        <div class="sum-pct" id="sumPct">100%</div>
+      </div>
+    </div>
+
+    <div class="fgroup" style="margin-top:16px;">
+      <label>Remarks / Feedback <span style="font-weight:400;text-transform:none;">(optional)</span></label>
+      <textarea id="remarks" rows="2" placeholder="Strengths, weaknesses, suggestions..."></textarea>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitForm()">
+      ✅ Submit Evaluation &amp; Sync to Google Sheets
+    </button>
+  </div>
+
+  <!-- ── Leaderboard ──────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-title">🏆 Live Project Rankings</div>
+    <div class="lb-bar">
+      <span class="lb-count" id="lbCount">Loading…</span>
+      <button class="refresh-btn" onclick="loadRankings()">⟳ Refresh</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Project</th>
+          <th>Score</th>
+          <th>Progress</th>
+          <th>Evaluator</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody id="rankBody">
+        <tr><td colspan="6" class="loading">Loading rankings…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ============================================================
+//  ▶  PASTE YOUR APPS SCRIPT WEB APP URL BETWEEN THE QUOTES
+// ============================================================
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyNK1AONwbRiwhk-VesEImcKTO5vZTntUULMuOulLXwiKzxO5HDjx9qijGfZmsNk05o/exec";
+
+// ── Criteria data ────────────────────────────────────────────
+const CRITERIA = [
+  {
+    title : "Problem Identification & Relevance",
+    sub   : "Is the problem clearly defined? Is the project relevant to real-world needs?"
+  },
+  {
+    title : "Innovation & Originality",
+    sub   : "Does the project show creative or novel thinking beyond typical solutions?"
+  },
+  {
+    title : "Technical Execution & Functionality",
+    sub   : "Is the project well-built and functioning? Is the methodology sound?"
+  },
+  {
+    title : "Presentation & Communication",
+    sub   : "Can the team clearly explain their work? Are visuals and demos effective?"
+  },
+  {
+    title : "Impact & Practical Application",
+    sub   : "Does the project offer real benefit? Can it be applied or scaled further?"
+  }
+];
+const MAX = CRITERIA.length * 5;   // 25
+
+const scores = { q1:5, q2:5, q3:5, q4:5, q5:5 };
+
+// ── Build criteria rows ──────────────────────────────────────
+(function buildCriteria() {
+  const wrap = document.getElementById('criteriaRows');
+  CRITERIA.forEach((c, i) => {
+    const key = 'q' + (i + 1);
+    const div = document.createElement('div');
+    div.className = 'crow';
+    div.innerHTML = `
+      <div class="cnum">${i + 1}</div>
+      <div>
+        <div class="ctxt">${c.title}</div>
+        <div class="csub">${c.sub}</div>
+      </div>
+      <div class="sbtns" id="btns-${key}">
+        ${[1,2,3,4,5].map(v =>
+          `<button type="button" class="sbtn v${v}${v===5?' active':''}"
+              onclick="rate('${key}',${v})">${v}</button>`
+        ).join('')}
+      </div>`;
+    wrap.appendChild(div);
+  });
+  refreshSummary();
+})();
+
+function rate(key, val) {
+  scores[key] = val;
+  document.querySelectorAll(`#btns-${key} .sbtn`)
+    .forEach(b => b.classList.toggle('active', +b.textContent === val));
+  refreshSummary();
+}
+
+function refreshSummary() {
+  const total = Object.values(scores).reduce((a,b) => a+b, 0);
+  const pct   = Math.round(total / MAX * 100);
+  document.getElementById('sumScore').innerHTML = `${total} <span>/ ${MAX}</span>`;
+  document.getElementById('sumPct').textContent  = pct + '%';
+  const fill = document.getElementById('barFill');
+  fill.style.width = pct + '%';
+  fill.style.background = pct >= 80
+    ? 'linear-gradient(90deg,#27ae60,#1a8c4a)'
+    : pct >= 50
+    ? 'linear-gradient(90deg,#f39c12,#d35400)'
+    : 'linear-gradient(90deg,#e74c3c,#c0392b)';
+}
+
+// ── Toast ────────────────────────────────────────────────────
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'toast ' + type;
+  setTimeout(() => el.className = 'toast', 5000);
+}
+
+// ── Submit ───────────────────────────────────────────────────
+async function submitForm() {
+  const evaluatorName = document.getElementById('evaluatorName').value.trim();
+  const projectTitle  = document.getElementById('projectTitle').value.trim();
+  const teamName      = document.getElementById('teamName').value.trim();
+
+  if (!evaluatorName || !projectTitle || !teamName) {
+    toast('⚠️ Please fill in Evaluator Name, Project Title and Team / Student Name.', 'err');
+    return;
+  }
+  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
+    toast('⚠️ Please paste your Apps Script Web App URL in the SCRIPT_URL variable.', 'warn');
+    return;
+  }
+
+  const total   = Object.values(scores).reduce((a,b) => a+b, 0);
+  const payload = {
+    timestamp: new Date().toLocaleString('en-IN'),
+    evaluatorName, projectTitle, teamName,
+    department : document.getElementById('department').value.trim(),
+    q1: scores.q1, q2: scores.q2, q3: scores.q3,
+    q4: scores.q4, q5: scores.q5,
+    totalScore : total,
+    remarks    : document.getElementById('remarks').value.trim()
+  };
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled  = true;
+  btn.innerText = '⏳ Submitting…';
+
+  try {
+    // POST with no-cors — data IS written to sheet (opaque response is fine)
+    await fetch(SCRIPT_URL, {
+      method : 'POST', mode : 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify(payload)
+    });
+    toast('✅ Submitted! Rankings will refresh in 2 seconds.', 'ok');
+    ['evaluatorName','projectTitle','teamName','department','remarks']
+      .forEach(id => document.getElementById(id).value = '');
+    CRITERIA.forEach((_, i) => rate('q' + (i + 1), 5));
+    setTimeout(loadRankings, 2000);
+  } catch (e) {
+    toast('❌ Submission failed. Check your internet connection.', 'err');
+  } finally {
+    btn.disabled  = false;
+    btn.innerText = '✅ Submit Evaluation & Sync to Google Sheets';
+  }
+}
+
+// ── Load Rankings ────────────────────────────────────────────
+async function loadRankings() {
+  const body = document.getElementById('rankBody');
+  body.innerHTML = '<tr><td colspan="6" class="loading">Loading…</td></tr>';
+
+  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#e67e22;padding:24px;">⚠️ Paste your SCRIPT_URL to see live rankings.</td></tr>';
+    document.getElementById('lbCount').textContent = '—';
+    return;
+  }
+
+  try {
+    // GET without no-cors so the JSON response is readable
+    const res  = await fetch(SCRIPT_URL + '?action=getRankings&t=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    document.getElementById('lbCount').textContent =
+      Array.isArray(data)
+        ? `${data.length} project${data.length !== 1 ? 's' : ''} evaluated`
+        : '—';
+
+    if (!Array.isArray(data) || data.length === 0) {
+      body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:28px;">No entries yet — submit the first evaluation!</td></tr>';
+      return;
+    }
+
+    data.sort((a,b) => b.totalScore - a.totalScore);
+
+    body.innerHTML = data.map((r, i) => {
+      const rank  = i + 1;
+      const cls   = rank===1?'r1':rank===2?'r2':rank===3?'r3':'rn';
+      const medal = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'#'+rank;
+      const pct   = Math.round(r.totalScore / MAX * 100);
+      const sCls  = pct >= 80 ? 'sh' : pct >= 50 ? 'sm' : 'sl';
+      return `<tr>
+        <td><span class="rbadge ${cls}">${medal}</span></td>
+        <td>
+          <div class="proj-title">${r.projectTitle || '—'}</div>
+          <div class="proj-team">👥 ${r.teamName || '—'}</div>
+        </td>
+        <td>
+          <span class="spill ${sCls}">${r.totalScore} / ${MAX}</span>
+          <div class="breakdown">R:${r.q1} I:${r.q2} T:${r.q3} P:${r.q4} Im:${r.q5}</div>
+        </td>
+        <td>
+          <div style="font-size:.8em;color:var(--muted);">${pct}%</div>
+          <div class="pmini"><div class="pmini-fill" style="width:${pct}%"></div></div>
+        </td>
+        <td style="font-size:.84em;color:var(--muted);">${r.evaluatorName || '—'}</td>
+        <td style="font-size:.8em;color:#aaa;max-width:140px;">${r.remarks || ''}</td>
+      </tr>`;
+    }).join('');
+
+  } catch (err) {
+    console.error(err);
+    body.innerHTML = `<tr><td colspan="6" style="color:red;text-align:center;padding:24px;">
+      ❌ Failed to load rankings.<br><br>
+      <small style="color:#555;line-height:2.2;">
+        Fix checklist:<br>
+        1. Is <b>SCRIPT_URL</b> correct in this HTML?<br>
+        2. Apps Script → Deploy → Manage Deployments → Who has access = <b>Anyone</b><br>
+        3. Did you click <b>Deploy new version</b> after editing the script?<br>
+        4. <a href="${SCRIPT_URL}?action=getRankings" target="_blank" style="color:var(--pri);">
+           Open this link</a> — should show <code>[]</code>, not a Google login page.
+      </small>
+    </td></tr>`;
+  }
+}
+
+window.onload = loadRankings;
+</script>
+</body>
+</html>
