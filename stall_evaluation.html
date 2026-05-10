@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Day — Department Stall Evaluation</title>
+
+    <style>
+        :root {
+            --primary: #6c3fc5;
+            --primary-dark: #4e2d91;
+            --accent: #f39c12;
+            --bg: #f0edf8;
+            --card: #ffffff;
+            --border: #e0d9f0;
+            --text: #2c2c3e;
+            --muted: #7f8c8d;
+            --green: #27ae60;
+            --red: #e74c3c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 30px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .page-header h1 {
+            font-size: 1.8em;
+            margin-bottom: 8px;
+        }
+
+        .card {
+            background: var(--card);
+            padding: 28px;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(108, 63, 197, 0.08);
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--muted);
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #faf9fe;
+            font-size: 15px;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .criteria-header,
+        .criteria-row {
+            display: grid;
+            grid-template-columns: 40px 1fr 220px;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .criteria-header {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+        }
+
+        .criteria-row {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-top: none;
+            background: white;
+        }
+
+        .criteria-row:nth-child(even) {
+            background: #f8f5ff;
+        }
+
+        .criteria-num {
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .score-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 5px;
+        }
+
+        .score-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-weight: bold;
+            background: #f0edf8;
+        }
+
+        .score-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .summary {
+            margin-top: 20px;
+            background: #f7f5fd;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .summary-flex {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .total-score {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .progress-wrap {
+            flex: 1;
+            height: 10px;
+            background: #ddd;
+            border-radius: 10px;
+            margin: 0 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #a07ee0);
+            width: 100%;
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.95;
+        }
+
+        .toast {
+            display: none;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .success {
+            display: block;
+            background: #eafaf1;
+            color: #1e8449;
+        }
+
+        .error {
+            display: block;
+            background: #fdedec;
+            color: #922b21;
+        }
+
+        .leaderboard table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaderboard th {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .leaderboard td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .leaderboard tr:hover {
+            background: #f7f5fd;
+        }
+
+        .rank {
+            font-weight: bold;
+        }
+
+        .score-pill {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            background: #eafaf1;
+            color: #1e8449;
+        }
+
+        @media(max-width:700px) {
+
+            .form-row,
+            .criteria-header,
+            .criteria-row {
+                grid-template-columns: 1fr;
+            }
+
+            .score-buttons {
+                justify-content: flex-start;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="page-header">
+            <h1>🏛️ Open Day — Department Stall Evaluation</h1>
+            <p>Department Evaluation & Live Ranking System</p>
+        </div>
+
+        <div class="card">
+
+            <div class="card-title">📋 Evaluation Form</div>
+
+            <div id="toast" class="toast"></div>
+
+            <div class="form-row">
+
+                <div>
+                    <label>Evaluator Name</label>
+                    <input type="text" id="evaluatorName">
+                </div>
+
+                <div>
+                    <label>Department Name</label>
+                    <input type="text" id="department">
+                </div>
+
+            </div>
+
+            <div class="criteria-header">
+                <div>#</div>
+                <div>Evaluation Criteria</div>
+                <div style="text-align:right;">Score</div>
+            </div>
+
+            <div id="criteriaRows"></div>
+
+            <div class="summary">
+
+                <div class="summary-flex">
+
+                    <div>
+                        <div>Total Score</div>
+                        <div class="total-score" id="totalDisplay">50 / 50</div>
+                    </div>
+
+                    <div class="progress-wrap">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+
+                    <div>
+                        <div>Percentage</div>
+                        <div class="total-score" id="percentage">100%</div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div style="margin-top:20px;">
+                <label>Remarks</label>
+                <textarea id="remarks"></textarea>
+            </div>
+
+            <button class="submit-btn" id="submitBtn" onclick="submitEvaluation()">
+                ✅ Submit Evaluation
+            </button>
+
+        </div>
+
+        <!-- Leaderboard -->
+
+        <div class="card leaderboard">
+
+            <div class="card-title">🏆 Department Rankings</div>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Department</th>
+                        <th>Total Score</th>
+                        <th>Evaluator</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+
+                <tbody id="rankBody">
+                    <tr>
+                        <td colspan="5">Loading...</td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        // =====================================================
+        // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL
+        // =====================================================
+
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoiibSGimjLK1XFzDmYjV0A0gLUgNaC0tErGcwSxkwB82e5i8xKJ0usZ8CBGrwnvPx/exec";
+
+        const CRITERIA = [
+
+            "Student & Faculty Involvement and Enthusiasm",
+            "Teamwork and Collaboration",
+            "Initiative to Engage Visitors",
+            "Appreciative Ambience",
+            "Aesthetic and Layout of the Stall",
+            "Novelty in Ideas or Execution",
+            "Prospectus / Brochure Quality",
+            "Ease of Understanding for Non-Technical Audience",
+            "Interactive Elements or Live Demos",
+            "Project Display / Demo Quality"
+
+        ];
+
+        const MAX_SCORE = 50;
+
+        const scores = {};
+
+        CRITERIA.forEach((c, i) => {
+
+            scores["q" + (i + 1)] = 5;
+
+        });
+
+        function buildCriteria() {
+
+            const container = document.getElementById("criteriaRows");
+
+            CRITERIA.forEach((text, index) => {
+
+                const key = "q" + (index + 1);
+
+                const row = document.createElement("div");
+
+                row.className = "criteria-row";
+
+                row.innerHTML = `
+
+                <div class="criteria-num">${index + 1}</div>
+
+                <div>${text}</div>
+
+                <div class="score-buttons" id="btns-${key}">
+
+                    ${[1,2,3,4,5].map(v => `
+
+                        <button class="score-btn ${v===5 ? 'active':''}"
+                        onclick="setScore('${key}',${v})">
+
+                        ${v}
+
+                        </button>
+
+                    `).join('')}
+
+                </div>
+
+                `;
+
+                container.appendChild(row);
+
+            });
+
+            updateSummary();
+
+        }
+
+        function setScore(key, value) {
+
+            scores[key] = value;
+
+            document.querySelectorAll(`#btns-${key} .score-btn`)
+                .forEach(btn => {
+
+                    btn.classList.remove("active");
+
+                    if (Number(btn.innerText) === value) {
+
+                        btn.classList.add("active");
+
+                    }
+
+                });
+
+            updateSummary();
+
+        }
+
+        function updateSummary() {
+
+            const total = Object.values(scores)
+                .reduce((a, b) => a + b, 0);
+
+            const percent = Math.round((total / MAX_SCORE) * 100);
+
+            document.getElementById("totalDisplay")
+                .innerHTML = `${total} / ${MAX_SCORE}`;
+
+            document.getElementById("percentage")
+                .innerHTML = `${percent}%`;
+
+            document.getElementById("progressBar")
+                .style.width = percent + "%";
+
+        }
+
+        function showToast(msg, type) {
+
+            const toast = document.getElementById("toast");
+
+            toast.innerHTML = msg;
+
+            toast.className = "toast " + type;
+
+            setTimeout(() => {
+
+                toast.className = "toast";
+
+            }, 4000);
+
+        }
+
+        async function submitEvaluation() {
+
+            const evaluatorName =
+                document.getElementById("evaluatorName").value.trim();
+
+            const department =
+                document.getElementById("department").value.trim();
+
+            if (!evaluatorName || !department) {
+
+                showToast("Please enter Evaluator Name and Department", "error");
+
+                return;
+
+            }
+
+            const total = Object.values(scores)
+                .reduce((a, b) => a + b, 0);
+
+            const payload = {
+
+                timestamp: new Date().toLocaleString("en-IN"),
+
+                evaluatorName,
+                department,
+
+                q1: scores.q1,
+                q2: scores.q2,
+                q3: scores.q3,
+                q4: scores.q4,
+                q5: scores.q5,
+                q6: scores.q6,
+                q7: scores.q7,
+                q8: scores.q8,
+                q9: scores.q9,
+                q10: scores.q10,
+
+                totalScore: total,
+
+                remarks:
+                    document.getElementById("remarks").value.trim()
+
+            };
+
+            const btn = document.getElementById("submitBtn");
+
+            btn.disabled = true;
+
+            btn.innerHTML = "Submitting...";
+
+            try {
+
+                await fetch(SCRIPT_URL, {
+
+                    method: "POST",
+
+                    mode: "no-cors",
+
+                    headers: {
+
+                        "Content-Type": "application/json"
+
+                    },
+
+                    body: JSON.stringify(payload)
+
+                });
+
+                showToast("Evaluation Submitted Successfully", "success");
+
+                document.getElementById("evaluatorName").value = "";
+
+                document.getElementById("department").value = "";
+
+                document.getElementById("remarks").value = "";
+
+                CRITERIA.forEach((c, i) => {
+
+                    setScore("q" + (i + 1), 5);
+
+                });
+
+                setTimeout(loadRankings, 2000);
+
+            } catch (err) {
+
+                showToast("Submission Failed", "error");
+
+            }
+
+            btn.disabled = false;
+
+            btn.innerHTML = "✅ Submit Evaluation";
+
+        }
+
+        async function loadRankings() {
+
+            const body = document.getElementById("rankBody");
+
+            body.innerHTML =
+                `<tr><td colspan="5">Loading...</td></tr>`;
+
+            try {
+
+                const res = await fetch(
+                    SCRIPT_URL + "?action=getRankings&t=" + Date.now()
+                );
+
+                const data = await res.json();
+
+                if (!Array.isArray(data) || data.length === 0) {
+
+                    body.innerHTML =
+                        `<tr><td colspan="5">No Records Found</td></tr>`;
+
+                    return;
+
+                }
+
+                // SORT BY TOTAL SCORE DESCENDING
+
+                data.sort((a, b) => b.totalScore - a.totalScore);
+
+                body.innerHTML = data.map((row, index) => `
+
+                <tr>
+
+                    <td class="rank">
+
+                        ${index + 1}
+
+                    </td>
+
+                    <td>
+
+                        <strong>${row.department}</strong>
+
+                    </td>
+
+                    <td>
+
+                        <span class="score-pill">
+
+                            ${row.totalScore} / 50
+
+                        </span>
+
+                    </td>
+
+                    <td>
+
+                        ${row.evaluatorName}
+
+                    </td>
+
+                    <td>
+
+                        ${row.remarks || ''}
+
+                    </td>
+
+                </tr>
+
+                `).join('');
+
+            }
+
+            catch (err) {
+
+                body.innerHTML =
+                    `<tr><td colspan="5">Unable to Load Rankings</td></tr>`;
+
+            }
+
+        }
+
+        buildCriteria();
+
+        loadRankings();
+
+    </script>
+
+</body>
+
+</html>
