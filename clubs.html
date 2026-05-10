@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Day — Club Evaluation</title>
+    <style>
+        :root {
+            --primary: #6c3fc5;
+            --primary-dark: #4e2d91;
+            --accent: #f39c12;
+            --bg: #f0edf8;
+            --card: #ffffff;
+            --border: #e0d9f0;
+            --text: #2c2c3e;
+            --muted: #7f8c8d;
+            --green: #27ae60;
+            --red: #e74c3c;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+        }
+        .container { max-width: 860px; margin: auto; }
+
+        /* Header */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 28px 30px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .page-header h1 { font-size: 1.7em; margin-bottom: 4px; }
+        .page-header p  { opacity: 0.85; font-size: 0.95em; }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            padding: 28px 30px;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(108,63,197,0.08);
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+        .card-title {
+            font-size: 1.15em;
+            font-weight: 700;
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Form fields */
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+        .form-group { margin-bottom: 0; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.88em;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 6px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.97em;
+            color: var(--text);
+            background: #faf9fe;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(108,63,197,0.1);
+        }
+
+        /* Criteria rows */
+        .criteria-section { margin-bottom: 6px; }
+        .criteria-header {
+            display: grid;
+            grid-template-columns: 32px 1fr 180px;
+            gap: 10px;
+            align-items: center;
+            padding: 8px 12px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .criteria-row {
+            display: grid;
+            grid-template-columns: 32px 1fr 180px;
+            gap: 10px;
+            align-items: center;
+            padding: 11px 12px;
+            border: 1px solid var(--border);
+            border-top: none;
+            background: #fdfcff;
+            transition: background 0.15s;
+        }
+        .criteria-row:last-child { border-radius: 0 0 8px 8px; }
+        .criteria-row:nth-child(odd) { background: #f7f5fd; }
+        .criteria-row:hover { background: #f0edf8; }
+        .criteria-num {
+            width: 26px; height: 26px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.78em; font-weight: 700;
+            flex-shrink: 0;
+        }
+        .criteria-text { font-size: 0.9em; line-height: 1.4; }
+
+        /* Score buttons */
+        .score-btns { display: flex; gap: 5px; justify-content: flex-end; }
+        .score-btn {
+            width: 32px; height: 32px;
+            border-radius: 7px;
+            border: 1.5px solid var(--border);
+            background: #f0edf8;
+            color: #777;
+            font-size: 0.85em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .score-btn:hover { background: #e0d9f0; border-color: var(--primary); color: var(--primary); }
+        .score-btn.active { background: var(--primary); border-color: var(--primary); color: white; transform: scale(1.08); }
+        .score-btn.s5.active { background: #27ae60; border-color: #27ae60; }
+        .score-btn.s4.active { background: #2ecc71; border-color: #2ecc71; }
+        .score-btn.s3.active { background: #f39c12; border-color: #f39c12; }
+        .score-btn.s2.active { background: #e67e22; border-color: #e67e22; }
+        .score-btn.s1.active { background: #e74c3c; border-color: #e74c3c; }
+
+        /* Score summary */
+        .score-summary {
+            display: flex; align-items: center; justify-content: space-between;
+            background: linear-gradient(135deg, #f7f5fd, #ede8f8);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 20px;
+            margin: 18px 0 4px;
+        }
+        .score-summary .label { font-weight: 600; color: var(--muted); font-size: 0.9em; }
+        .score-total { font-size: 2em; font-weight: 800; color: var(--primary); line-height: 1; }
+        .score-total span { font-size: 0.45em; font-weight: 400; color: var(--muted); }
+        .score-bar-wrap { flex: 1; margin: 0 20px; height: 10px; background: #e0d9f0; border-radius: 5px; overflow: hidden; }
+        .score-bar { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--primary), #a07ee0); transition: width 0.3s; }
+
+        /* Submit button */
+        .submit-btn {
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; border: none;
+            border-radius: 10px; font-size: 1em; font-weight: 700;
+            cursor: pointer; transition: all 0.2s;
+            margin-top: 16px; letter-spacing: 0.02em;
+        }
+        .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(108,63,197,0.3); }
+        .submit-btn:disabled { background: #bdc3c7; transform: none; box-shadow: none; cursor: not-allowed; }
+
+        /* Toast */
+        .toast {
+            display: none; padding: 13px 18px; border-radius: 9px;
+            font-weight: 600; margin-bottom: 18px; font-size: 0.95em;
+        }
+        .toast.success { display:block; background:#eafaf1; color:#1e8449; border:1.5px solid #a9dfbf; }
+        .toast.error   { display:block; background:#fdedec; color:#922b21; border:1.5px solid #f1948a; }
+
+        /* Leaderboard */
+        .refresh-btn {
+            background: none; border: 1.5px solid var(--primary);
+            color: var(--primary); padding: 7px 18px; font-size: 0.85em;
+            border-radius: 7px; cursor: pointer; font-weight: 600;
+            margin-bottom: 16px; transition: all 0.2s;
+        }
+        .refresh-btn:hover { background: var(--primary); color: white; }
+
+        .lb-table { width: 100%; border-collapse: collapse; }
+        .lb-table th {
+            background: var(--primary); color: white;
+            padding: 11px 14px; text-align: left;
+            font-size: 0.78em; text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .lb-table th:first-child { border-radius: 8px 0 0 0; }
+        .lb-table th:last-child  { border-radius: 0 8px 0 0; }
+        .lb-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 0.9em; }
+        .lb-table tr:last-child td { border-bottom: none; }
+        .lb-table tr:hover td { background: #f7f5fd; }
+
+        .rank-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 36px; padding: 3px 8px;
+            border-radius: 6px; font-weight: 700; font-size: 0.85em;
+        }
+        .rank-1 { background: #f1c40f; color: #fff; }
+        .rank-2 { background: #95a5a6; color: #fff; }
+        .rank-3 { background: #e67e22; color: #fff; }
+        .rank-n { background: #ecf0f1; color: #555; }
+
+        .score-pill {
+            display: inline-block;
+            padding: 3px 10px; border-radius: 20px;
+            font-weight: 700; font-size: 0.88em;
+        }
+        .score-high   { background: #eafaf1; color: #1e8449; }
+        .score-medium { background: #fef9e7; color: #d35400; }
+        .score-low    { background: #fdedec; color: #922b21; }
+
+        .progress-mini { height: 6px; background: #e0d9f0; border-radius: 3px; margin-top: 4px; overflow: hidden; }
+        .progress-mini-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #a07ee0); }
+
+        .loading { text-align: center; color: var(--muted); font-style: italic; padding: 24px; }
+
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+            .criteria-header, .criteria-row { grid-template-columns: 28px 1fr; }
+            .score-btns, .criteria-col-header { display: none; }
+            .criteria-row { display: block; padding: 10px 12px; }
+            .criteria-row .score-btns { display: flex; margin-top: 8px; justify-content: flex-start; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="page-header">
+        <h1>🎓 Open Day — Club Evaluation</h1>
+        <p>Evaluate club stalls and track live scores. Max score: <strong>50 points</strong> (10 criteria × 5)</p>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="card">
+        <div class="card-title">📋 Evaluation Form</div>
+        <div id="toast" class="toast"></div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Evaluator Name *</label>
+                <input type="text" id="evaluatorName" placeholder="Your full name">
+            </div>
+            <div class="form-group">
+                <label>Club Name *</label>
+                <input type="text" id="clubName" placeholder="e.g. Robotics Club, NSS, etc.">
+            </div>
+        </div>
+
+        <div class="criteria-section">
+            <div class="criteria-header">
+                <div>#</div>
+                <div>Evaluation Criteria</div>
+                <div style="text-align:right;">Score (1=Very Poor → 5=Excellent)</div>
+            </div>
+            <div id="criteriaRows"></div>
+        </div>
+
+        <div class="score-summary">
+            <div>
+                <div class="label">Total Score</div>
+                <div class="score-total" id="totalDisplay">50 <span>/ 50</span></div>
+            </div>
+            <div class="score-bar-wrap">
+                <div class="score-bar" id="scoreBar" style="width:100%"></div>
+            </div>
+            <div style="text-align:right;">
+                <div class="label">Percentage</div>
+                <div style="font-size:1.4em;font-weight:800;color:var(--primary);" id="pctDisplay">100%</div>
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top:14px;">
+            <label>Remarks (Optional)</label>
+            <textarea id="remarks" rows="2" placeholder="Any specific observations or feedback about this club stall..."></textarea>
+        </div>
+
+        <button class="submit-btn" id="submitBtn" onclick="submitEvaluation()">
+            ✅ Submit Evaluation & Sync to Google Sheets
+        </button>
+    </div>
+
+    <!-- LEADERBOARD CARD -->
+    <div class="card">
+        <div class="card-title">🏆 Live Club Rankings</div>
+        <button class="refresh-btn" onclick="loadRankings()">⟳ Refresh Rankings</button>
+        <table class="lb-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Club Name</th>
+                    <th>Score</th>
+                    <th>Progress</th>
+                    <th>Evaluator</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody id="rankBody">
+                <tr><td colspan="6" class="loading">Loading rankings...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    // ============================================================
+    //  PASTE YOUR APPS SCRIPT WEB APP URL HERE
+    // ============================================================
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0ZrwzJVsa0EjxXAeUIaw4XZqAdUPtZATn0eakRyyFYju37tuVCSOQHicsFVklW4HzUQ/exec";
+
+    // ---- Criteria definitions ----
+    const CRITERIA = [
+        "Club stall is well organized and visually appealing",
+        "Posters, banners, and displays clearly explain club activities",
+        "Student coordinators confidently explain club objectives and achievements",
+        "Demonstrations / projects / events are innovative and engaging",
+        "Visitors are actively involved through interaction or activities",
+        "Information provided is relevant, informative, and easy to understand",
+        "Team coordination and participation among members is effective",
+        "Creativity and uniqueness of presentation",
+        "Club activities reflect technical / professional development goals",
+        "Overall impact and impression created by the club"
+    ];
+    const MAX_SCORE = CRITERIA.length * 5; // 50
+
+    // scores object: q1..q10, all default 5
+    const scores = {};
+    CRITERIA.forEach((_, i) => scores['q' + (i + 1)] = 5);
+
+    // ---- Build criteria rows ----
+    function buildCriteria() {
+        const container = document.getElementById('criteriaRows');
+        CRITERIA.forEach((text, i) => {
+            const key = 'q' + (i + 1);
+            const row = document.createElement('div');
+            row.className = 'criteria-row';
+            row.innerHTML = `
+                <div class="criteria-num">${i + 1}</div>
+                <div class="criteria-text">${text}</div>
+                <div class="score-btns" id="btns-${key}">
+                    ${[1,2,3,4,5].map(v =>
+                        `<button type="button" class="score-btn s${v}${v===5?' active':''}"
+                            onclick="setScore('${key}',${v})">${v}</button>`
+                    ).join('')}
+                </div>`;
+            container.appendChild(row);
+        });
+        updateSummary();
+    }
+
+    function setScore(key, val) {
+        scores[key] = val;
+        document.querySelectorAll(`#btns-${key} .score-btn`)
+            .forEach(b => b.classList.toggle('active', parseInt(b.textContent) === val));
+        updateSummary();
+    }
+
+    function updateSummary() {
+        const total = Object.values(scores).reduce((a, b) => a + b, 0);
+        const pct   = Math.round((total / MAX_SCORE) * 100);
+        document.getElementById('totalDisplay').innerHTML = `${total} <span>/ ${MAX_SCORE}</span>`;
+        document.getElementById('pctDisplay').textContent = pct + '%';
+        document.getElementById('scoreBar').style.width   = pct + '%';
+    }
+
+    // ---- Toast ----
+    function showToast(msg, type) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className   = 'toast ' + type;
+        setTimeout(() => t.className = 'toast', 5000);
+    }
+
+    // ---- Submit ----
+    async function submitEvaluation() {
+        const evaluatorName = document.getElementById('evaluatorName').value.trim();
+        const clubName      = document.getElementById('clubName').value.trim();
+
+        if (!evaluatorName || !clubName) {
+            showToast('⚠️ Please fill in both Evaluator Name and Club Name.', 'error');
+            return;
+        }
+        if (SCRIPT_URL === "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE") {
+            showToast('⚠️ Please paste your Apps Script URL in the SCRIPT_URL variable inside this HTML file.', 'error');
+            return;
+        }
+
+        const total   = Object.values(scores).reduce((a, b) => a + b, 0);
+        const payload = {
+            timestamp:    new Date().toLocaleString('en-IN'),
+            evaluatorName, clubName,
+            q1:  scores.q1,  q2:  scores.q2,  q3: scores.q3,
+            q4:  scores.q4,  q5:  scores.q5,  q6: scores.q6,
+            q7:  scores.q7,  q8:  scores.q8,  q9: scores.q9,
+            q10: scores.q10,
+            totalScore: total,
+            remarks: document.getElementById('remarks').value.trim()
+        };
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled  = true;
+        btn.innerText = '⏳ Submitting...';
+
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST', mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            showToast('✅ Evaluation submitted! Rankings will refresh in 2 seconds.', 'success');
+
+            // Reset form
+            document.getElementById('evaluatorName').value = '';
+            document.getElementById('clubName').value      = '';
+            document.getElementById('remarks').value       = '';
+            CRITERIA.forEach((_, i) => setScore('q' + (i + 1), 5));
+
+            setTimeout(loadRankings, 2000);
+
+        } catch (err) {
+            showToast('❌ Submission failed. Check your internet connection.', 'error');
+        } finally {
+            btn.disabled  = false;
+            btn.innerText = '✅ Submit Evaluation & Sync to Google Sheets';
+        }
+    }
+
+    // ---- Load Rankings ----
+    async function loadRankings() {
+        const body = document.getElementById('rankBody');
+        body.innerHTML = '<tr><td colspan="6" class="loading">Loading...</td></tr>';
+
+        if (SCRIPT_URL === "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE") {
+            body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#e67e22;padding:20px;">⚠️ Paste your SCRIPT_URL in the HTML to enable live rankings.</td></tr>';
+            return;
+        }
+
+        try {
+            const res  = await fetch(SCRIPT_URL + '?action=getRankings&t=' + Date.now());
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+
+            if (!Array.isArray(data) || data.length === 0) {
+                body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">No entries yet — submit the first evaluation!</td></tr>';
+                return;
+            }
+
+            data.sort((a, b) => b.totalScore - a.totalScore);
+
+            body.innerHTML = data.map((row, i) => {
+                const rank  = i + 1;
+                const cls   = rank===1?'rank-1':rank===2?'rank-2':rank===3?'rank-3':'rank-n';
+                const medal = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'#'+rank;
+                const pct   = Math.round((row.totalScore / MAX_SCORE) * 100);
+                const sCls  = pct >= 80 ? 'score-high' : pct >= 50 ? 'score-medium' : 'score-low';
+
+                return `<tr>
+                    <td><span class="rank-badge ${cls}">${medal}</span></td>
+                    <td><strong>${row.clubName || '—'}</strong></td>
+                    <td>
+                        <span class="score-pill ${sCls}">${row.totalScore} / ${MAX_SCORE}</span>
+                    </td>
+                    <td style="min-width:100px;">
+                        <div style="font-size:0.8em;color:var(--muted);">${pct}%</div>
+                        <div class="progress-mini">
+                            <div class="progress-mini-fill" style="width:${pct}%"></div>
+                        </div>
+                    </td>
+                    <td style="font-size:0.85em;color:var(--muted);">${row.evaluatorName || '—'}</td>
+                    <td style="font-size:0.82em;color:#aaa;max-width:160px;">${row.remarks || ''}</td>
+                </tr>`;
+            }).join('');
+
+        } catch (err) {
+            body.innerHTML = `<tr><td colspan="6" style="color:red;text-align:center;padding:20px;">
+                ❌ Failed to load rankings.<br><br>
+                <small style="color:#555;line-height:1.8;">
+                  Checklist:<br>
+                  1. Is <b>SCRIPT_URL</b> correct in this HTML?<br>
+                  2. Apps Script → Deploy → Manage Deployments → Who has access = <b>Anyone</b><br>
+                  3. Did you click <b>Deploy new version</b> after editing the script?<br>
+                  4. <a href="${SCRIPT_URL}?action=getRankings" target="_blank" style="color:var(--primary);">Click here</a> — should show JSON, not a login page.
+                </small>
+            </td></tr>`;
+        }
+    }
+
+    // ---- Init ----
+    buildCriteria();
+    window.onload = loadRankings;
+</script>
+</body>
+</html>

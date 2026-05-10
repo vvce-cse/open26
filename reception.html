@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reception & TAP Evaluation</title>
+    <style>
+        :root { --primary: #2980b9; --bg: #f4f7f9; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 30px; }
+        h2 { color: var(--primary); border-bottom: 2px solid #e1e8ed; padding-bottom: 10px; margin-top: 0; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; color: #34495e; font-size: 0.95em; }
+        input, textarea { width: 100%; padding: 12px; border: 1px solid #ccd1d9; border-radius: 6px; box-sizing: border-box; font-size: 1em; }
+        input:focus, textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 5px rgba(41,128,185,0.2); }
+        .score-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .score-hint { font-size: 0.78em; color: #999; margin-top: 4px; }
+        .star-row { display: flex; gap: 6px; margin-top: 6px; }
+        .star-btn { width: 36px; height: 36px; border-radius: 6px; border: 1px solid #ccd1d9; background: #f0f0f0; cursor: pointer; font-size: 14px; font-weight: bold; color: #555; transition: all 0.15s; }
+        .star-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        button.submit { background-color: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 6px; cursor: pointer; font-size: 1em; font-weight: bold; width: 100%; transition: background 0.3s; }
+        button.submit:hover { background-color: #1f6391; }
+        button.submit:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        button.refresh { background: none; border: 1px solid var(--primary); color: var(--primary); padding: 8px 18px; font-size: 0.85em; border-radius: 6px; cursor: pointer; margin-bottom: 16px; }
+        button.refresh:hover { background: var(--primary); color: white; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 13px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: var(--primary); color: white; font-size: 0.82em; text-transform: uppercase; }
+        .rank-1 { background:#f1c40f; color:#fff; padding:3px 9px; border-radius:4px; font-weight:bold; }
+        .rank-2 { background:#95a5a6; color:#fff; padding:3px 9px; border-radius:4px; font-weight:bold; }
+        .rank-3 { background:#e67e22; color:#fff; padding:3px 9px; border-radius:4px; font-weight:bold; }
+        .rank-n { background:#ecf0f1; color:#555; padding:3px 9px; border-radius:4px; font-weight:bold; }
+        .toast { display:none; padding:13px 18px; border-radius:8px; font-weight:600; margin-bottom:16px; }
+        .toast.success { display:block; background:#e8f8f5; color:#1e8449; border:1px solid #a9dfbf; }
+        .toast.error   { display:block; background:#fdedec; color:#922b21; border:1px solid #f1948a; }
+        .loading { text-align:center; color:#7f8c8d; font-style:italic; }
+        .total-display { text-align:center; font-size:1.4em; font-weight:bold; color:var(--primary); margin: 10px 0 5px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="card">
+        <h2>🏫 Reception / TAP /Office Evaluation</h2>
+        <div id="toast" class="toast"></div>
+
+        <div class="form-group">
+            <label>Evaluator Name *</label>
+            <input type="text" id="evaluatorName" placeholder="Your Full Name">
+        </div>
+        <div class="form-group">
+            <label>Office / Section Name *</label>
+            <input type="text" id="officeNumber" placeholder="e.g. TAP Department or Main Reception">
+        </div>
+
+        <p style="font-weight:bold;color:var(--primary);margin-bottom:4px;">Scoring Criteria &nbsp;<span style="font-weight:normal;font-size:0.85em;color:#888;">(click a number: 1 = Low, 5 = High)</span></p>
+
+        <div class="score-section">
+            <div class="form-group">
+                <label>Aesthetics &amp; Maintenance</label>
+                <div class="star-row" id="stars-aesthetic"></div>
+                <div class="score-hint">Cleanliness &amp; upkeep of space</div>
+            </div>
+            <div class="form-group">
+                <label>Staff Punctuality</label>
+                <div class="star-row" id="stars-punctuality"></div>
+                <div class="score-hint">On time &amp; ready at post</div>
+            </div>
+            <div class="form-group">
+                <label>Greeting &amp; Politeness</label>
+                <div class="star-row" id="stars-greeting"></div>
+                <div class="score-hint">Warm welcome &amp; courteous behaviour</div>
+            </div>
+            <div class="form-group">
+                <label>Registration Processes</label>
+                <div class="star-row" id="stars-processes"></div>
+                <div class="score-hint">Speed &amp; accuracy of registration</div>
+            </div>
+            <div class="form-group">
+                <label>Visitor Assistance</label>
+                <div class="star-row" id="stars-assistance"></div>
+                <div class="score-hint">Helpful &amp; proactive support</div>
+            </div>
+        </div>
+
+        <div class="total-display">Total: <span id="totalDisplay">25</span> / 25</div>
+
+        <div class="form-group" style="margin-top:12px;">
+            <label>Remarks (Optional)</label>
+            <textarea id="remarks" rows="2" placeholder="Any specific feedback..."></textarea>
+        </div>
+
+        <button class="submit" id="submitBtn" onclick="submitEvaluation()">Submit Evaluation</button>
+    </div>
+
+    <div class="card">
+        <h2>🏆 Live Standings</h2>
+        <button class="refresh" onclick="loadRankings()">⟳ Refresh Rankings</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Office / Section</th>
+                    <th>Score</th>
+                    <th>Evaluator</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody id="rankBody">
+                <tr><td colspan="5" class="loading">Loading rankings...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<script>
+    // ============================================================
+    //  PASTE YOUR APPS SCRIPT WEB APP URL HERE
+    // ============================================================
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1TKZ8m0AuC03xl23Vc9Cfo1-ekrra4xiXVhqlqXCaPzepnwt32_NlbiA9A6tPbIX3/exec";
+
+    const criteria = ['aesthetic','punctuality','greeting','processes','assistance'];
+    const scores   = { aesthetic:5, punctuality:5, greeting:5, processes:5, assistance:5 };
+
+    // Build star buttons
+    criteria.forEach(key => {
+        const container = document.getElementById('stars-' + key);
+        for (let v = 1; v <= 5; v++) {
+            const btn = document.createElement('button');
+            btn.className   = 'star-btn' + (v === 5 ? ' active' : '');
+            btn.textContent = v;
+            btn.type        = 'button';
+            btn.onclick     = () => setScore(key, v);
+            container.appendChild(btn);
+        }
+    });
+
+    function setScore(key, val) {
+        scores[key] = val;
+        document.querySelectorAll('#stars-' + key + ' .star-btn')
+            .forEach(b => b.classList.toggle('active', parseInt(b.textContent) === val));
+        updateTotal();
+    }
+
+    function updateTotal() {
+        document.getElementById('totalDisplay').textContent = criteria.reduce((s,k) => s + scores[k], 0);
+    }
+
+    function showToast(msg, type) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className   = 'toast ' + type;
+        setTimeout(() => t.className = 'toast', 4500);
+    }
+
+    async function submitEvaluation() {
+        const evaluatorName = document.getElementById('evaluatorName').value.trim();
+        const officeNumber  = document.getElementById('officeNumber').value.trim();
+
+        if (!evaluatorName || !officeNumber) {
+            showToast('Please fill in Evaluator Name and Office / Section Name.', 'error');
+            return;
+        }
+
+        const total   = criteria.reduce((s,k) => s + scores[k], 0);
+        const payload = {
+            timestamp:     new Date().toLocaleString('en-IN'),
+            evaluatorName, officeNumber,
+            aesthetic:    scores.aesthetic,
+            punctuality:  scores.punctuality,
+            greeting:     scores.greeting,
+            processes:    scores.processes,
+            assistance:   scores.assistance,
+            totalScore:   total,
+            remarks:      document.getElementById('remarks').value.trim()
+        };
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled  = true;
+        btn.innerText = 'Submitting...';
+
+        try {
+            // POST with no-cors — data IS saved to sheet (response is opaque, that's fine)
+            await fetch(SCRIPT_URL, {
+                method: 'POST', mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            showToast('✅ Submitted! Rankings will refresh in 2 seconds.', 'success');
+            document.getElementById('evaluatorName').value = '';
+            document.getElementById('officeNumber').value  = '';
+            document.getElementById('remarks').value       = '';
+            criteria.forEach(k => setScore(k, 5));
+            setTimeout(loadRankings, 2000);
+
+        } catch (err) {
+            showToast('❌ Submission failed. Check your internet connection.', 'error');
+        } finally {
+            btn.disabled  = false;
+            btn.innerText = 'Submit Evaluation';
+        }
+    }
+
+    async function loadRankings() {
+        const body = document.getElementById('rankBody');
+        body.innerHTML = '<tr><td colspan="5" class="loading">Loading...</td></tr>';
+        try {
+            // KEY FIX: GET does NOT use no-cors so the response body is readable
+            const res = await fetch(SCRIPT_URL + '?action=getRankings&t=' + Date.now());
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+
+            if (!Array.isArray(data) || data.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#7f8c8d;padding:20px;">No entries yet — submit the first evaluation!</td></tr>';
+                return;
+            }
+
+            data.sort((a, b) => b.totalScore - a.totalScore);
+            body.innerHTML = data.map((row, i) => {
+                const rank  = i + 1;
+                const cls   = rank===1?'rank-1':rank===2?'rank-2':rank===3?'rank-3':'rank-n';
+                const medal = rank===1?'🥇 ':rank===2?'🥈 ':rank===3?'🥉 ':'';
+                const pct   = Math.round((row.totalScore / 25) * 100);
+                return `<tr>
+                    <td><span class="${cls}">${medal}#${rank}</span></td>
+                    <td><strong>${row.officeNumber || '—'}</strong></td>
+                    <td><b style="color:#27ae60;font-size:1.1em;">${row.totalScore}</b> <span style="color:#aaa;font-size:0.85em;">/ 25 (${pct}%)</span></td>
+                    <td style="font-size:0.85em;color:#7f8c8d;">${row.evaluatorName || '—'}</td>
+                    <td style="font-size:0.82em;color:#999;">${row.remarks || ''}</td>
+                </tr>`;
+            }).join('');
+
+        } catch (err) {
+            body.innerHTML = `<tr><td colspan="5" style="color:red;text-align:center;padding:20px;">
+                ❌ Failed to load rankings.<br><br>
+                <small style="color:#555;">
+                Fix checklist:<br>
+                1. Did you paste the correct SCRIPT_URL in this HTML?<br>
+                2. In Apps Script → Deploy → <b>Manage Deployments</b> → Edit → Who has access = <b>Anyone</b><br>
+                3. Did you click <b>Deploy new version</b> after changing the script?<br>
+                4. Open <a href="${SCRIPT_URL}?action=getRankings" target="_blank">this link</a> — it should show JSON, not a login page.
+                </small>
+            </td></tr>`;
+        }
+    }
+
+    window.onload = loadRankings;
+</script>
+</body>
+</html>
